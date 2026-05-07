@@ -1,0 +1,30 @@
+{
+  "project": "GENCROP",
+  "asset_type": "Seed Passport",
+  "passport_id": "GCROP-SEED-0001",
+  "crop": {
+    "name": "Heirloom Tomato",
+    "scientific_name": "Solanum lycopersicum",
+    "variety": "Local Heritage Line"
+  },
+  "origin": {
+    "country": "Turkey",
+    "region": "Gaziantep",
+    "gps_hash": "encrypted_location_hash"
+  },
+  "soil_data": {
+    "ph_level": 6.8,
+    "moisture": "medium",
+    "organic_matter": "high"
+  },
+  "ai_validation": {
+    "model": "Mobile Edge AI",
+    "confidence_score": 0.92,
+    "status": "verified"
+  },
+  "blockchain": {
+    "network": "Solana Devnet",
+    "nft_status": "ready_for_mint",
+    "metadata_standard": "Seed Passport NFT"
+  }
+}
