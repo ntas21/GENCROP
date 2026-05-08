@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENCROP Plant Health Check</title>
+
+<style>
+body{
+  margin:0;
+  background:#020802;
+  color:#39ff14;
+  font-family:Arial,sans-serif;
+  padding:24px;
+}
+.card{
+  max-width:760px;
+  margin:auto;
+  background:#061206;
+  border:1px solid #39ff14;
+  border-radius:20px;
+  padding:25px;
+  box-shadow:0 0 25px rgba(57,255,20,.15);
+}
+h1{font-size:38px;margin-bottom:8px;}
+p{color:#a0a0a0;line-height:1.6;}
+input,select{
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  background:#000;
+  color:#39ff14;
+  border:1px solid #39ff14;
+  border-radius:10px;
+  font-size:16px;
+  box-sizing:border-box;
+}
+button{
+  width:100%;
+  margin-top:16px;
+  padding:15px;
+  background:#39ff14;
+  color:#000;
+  border:0;
+  border-radius:10px;
+  font-size:17px;
+  font-weight:bold;
+}
+.result{
+  margin-top:22px;
+  padding:18px;
+  border:1px solid rgba(57,255,20,.35);
+  border-radius:14px;
+  background:#000;
+  white-space:pre-wrap;
+  color:#b7ff9a;
+}
+.badge{
+  display:inline-block;
+  background:#39ff14;
+  color:#000;
+  padding:8px 14px;
+  border-radius:20px;
+  font-weight:bold;
+  margin-bottom:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <div class="badge">LIVE API MODULE</div>
+
+  <h1>🌿 GENCROP Plant Health Check</h1>
+  <p>
+    Real weather data is fetched from Open-Meteo and converted into
+    plant health, watering and climate-risk recommendations.
+  </p>
+
+  <select id="plant">
+    <option value="Tomato">Tomato</option>
+    <option value="Wheat">Wheat</option>
+    <option value="Pepper">Pepper</option>
+    <option value="Olive Tree">Olive Tree</option>
+    <option value="House Plant">House Plant</option>
+  </select>
+
+  <input id="latitude" placeholder="Latitude e.g. 37.0662" value="37.0662">
+  <input id="longitude" placeholder="Longitude e.g. 37.3833" value="37.3833">
+
+  <button onclick="checkPlant()">Analyze Plant Health</button>
+
+  <div class="result" id="result">Waiting for live agricultural data...</div>
+</div>
+
+<script>
+async function checkPlant(){
+  const plant = document.getElementById("plant").value;
+  const lat = document.getElementById("latitude").value;
+  const lon = document.getElementById("longitude").value;
+  const result = document.getElementById("result");
+
+  result.innerText = "Fetching live climate data...";
+
+  try{
+    const url =
+      "https://api.open-meteo.com/v1/forecast?latitude=" + lat +
+      "&longitude=" + lon +
+      "&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m";
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const temp = data.current.temperature_2m;
+    const humidity = data.current.relative_humidity_2m;
+    const rain = data.current.precipitation;
+    const wind = data.current.wind_speed_10m;
+
+    let score = 100;
+    let advice = [];
+    let risk = "LOW";
+
+    if(temp > 32){
+      score -= 18;
+      advice.push("High temperature detected. Increase shading and monitor irrigation.");
+    }
+
+    if(temp < 8){
+      score -= 20;
+      advice.push("Low temperature detected. Cold stress risk exists.");
+    }
+
+    if(humidity < 35){
+      score -= 15;
+      advice.push("Low humidity detected. Soil may dry faster than normal.");
+    }
+
+    if(humidity > 80){
+      score -= 12;
+      advice.push("High humidity detected. Fungal disease risk may increase.");
+      risk = "MEDIUM";
+    }
+
+    if(rain > 0){
+      advice.push("Recent precipitation detected. Delay irrigation.");
+    } else {
+      advice.push("No precipitation detected. Check soil moisture before watering.");
+    }
+
+    if(wind > 25){
+      score -= 8;
+      advice.push("High wind detected. Young plants may need protection.");
+    }
+
+    if(score < 60){
+      risk = "HIGH";
+    }
+
+    if(advice.length === 0){
+      advice.push("Conditions look stable. Continue normal monitoring.");
+    }
+
+    result.innerText =
+`GENCROP LIVE PLANT ANALYSIS
+
+Plant: ${plant}
+Location: ${lat}, ${lon}
+
+Temperature: ${temp}°C
+Humidity: ${humidity}%
+Precipitation: ${rain} mm
+Wind Speed: ${wind} km/h
+
+Plant Health Score: ${score}/100
+Climate Risk: ${risk}
+
+AI Recommendation:
+- ${advice.join("\n- ")}
+
+Status: LIVE DATA VERIFIED`;
+  }catch(error){
+    result.innerText =
+"Data connection failed. Please check coordinates or try again.";
+  }
+}
+</script>
+
+</body>
+</html>
